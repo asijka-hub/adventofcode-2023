@@ -11,6 +11,6 @@ Advent of Code is an annual Advent calendar of small programming puzzles for a v
 - **Day 3:** 
 - **Day 4:** ⭐ 
 - **Day 5:** ⭐ 
-- **Day 6:** ⭐ 
+- **Day 6:** ⭐⭐ 
 
 
