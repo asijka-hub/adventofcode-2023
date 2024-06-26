@@ -1,4 +1,5 @@
 use std::cmp::Ordering;
+use std::cmp::Ordering::Equal;
 use std::collections::HashSet;
 use std::fs;
 
@@ -8,30 +9,28 @@ struct Hand {
     bet: u16,
 }
 
-// A A B B C
-// A B C C C
+fn card_value(c: char) -> u8 {
+    match c {
+        '2' => 1,
+        '3' => 2,
+        '4' => 3,
+        '5' => 4,
+        '6' => 5,
+        '7' => 6,
+        '8' => 7,
+        '9' => 8,
+        'T' => 9,
+        'J' => 10,
+        'Q' => 11,
+        'K' => 12,
+        'A' => 13,
+         _  => 0
+    }
+}
 
 impl Hand {
     fn my_type(&self) -> u8 {
-        // println!("dupa");
-        // for c in self.cards.chars() {
-        //     println!("{}", c);
-        // }
         let mut vec: Vec<char> = self.clone().cards.chars().collect();
-        // vec.sort();
-        // println!("{:#?}", vec);
-        // let mut rank: u8 = 0;
-        // let mut curr_rank: u8 = 1;
-        //
-        // for i in 1..5 {
-        //     println!("{}", vec[i]);
-        //     if vec[i - 1] == vec[i] {
-        //         curr_rank = curr_rank + 1;
-        //     } else {
-        //         rank = rank.max(curr_rank);
-        //         curr_rank = 1;
-        //     }
-        // }
         let mut set = HashSet::new();
         for c in vec.clone() {
             set.insert(c);
@@ -44,9 +43,26 @@ impl Hand {
 
         ranked.sort();
 
-        // println!("{:#?}", set);
-        // println!("{:#?}", ranked);
+        if ranked.len() == 1 {
+            return 50
+        }
+
         ranked[ranked.len() - 1] * 10 + ranked[ranked.len() - 2]
+    }
+
+    fn compare_each(&self, other: &Hand) -> Ordering {
+        let mut vec1: Vec<char> = self.clone().cards.chars().collect();
+        let mut vec2: Vec<char> = other.clone().cards.chars().collect();
+
+        for (i, c) in vec1.iter().enumerate() {
+            if card_value(*c) == card_value(vec2[i]) {
+                continue
+            } else {
+                return card_value(*c).cmp(&card_value(vec2[i]))
+            }
+        }
+
+        Ordering::Equal
     }
 }
 
@@ -66,19 +82,16 @@ impl PartialOrd for Hand {
 
 impl Ord for Hand {
     fn cmp(&self, other: &Self) -> Ordering {
-        // self.cards.cmp(&other.cards)
-        self.my_type().cmp(&other.my_type())
+        if self.my_type().cmp(&other.my_type()) == Equal {
+            self.compare_each(other)
+        } else {
+            self.my_type().cmp(&other.my_type())
+        }
     }
 }
 
 fn main() {
-    let input: String = fs::read_to_string("example.txt").unwrap();
-
-    let hand: Hand = Hand{cards: "12234".parse().unwrap(), bet: 27};
-
-    println!("{:?}", hand);
-
-    // hand.my_type();
+    let input: String = fs::read_to_string("input.txt").unwrap();
 
     let mut hands: Vec<Hand> = input.lines().map(|l| {
         let mut iter = l.split_whitespace();
@@ -93,9 +106,8 @@ fn main() {
     let mut res: u64 = 0;
 
     for (i, Hand {cards, bet}) in hands.iter().enumerate() {
-        res += (*bet as u64) * (i as u64);
+        res += (*bet as u64) * ((i + 1) as u64);
     }
 
-    // println!("{:#?}", hands);
-    println!("res: {}", res);
+    println!("{}", res);
 }
